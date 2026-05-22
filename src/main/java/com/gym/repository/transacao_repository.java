@@ -10,9 +10,14 @@ public interface transacao_repository extends JpaRepository<transacao, Long> {
 
     List<transacao> findByUsuarioId(Long usuarioId);
 
-    @Query("SELECT SUM(t.valor) FROM transacao t WHERE t.usuario.id = :usuarioId AND t.categoria.tipo = 'ganho'")
+    @Query("SELECT SUM(t.valor) FROM transacao t " +
+            "JOIN t.categoria c " +
+            "WHERE t.usuario.id = :usuarioId AND c.tipo = 'ganho'")
     Float calcular_income(@Param("usuarioId") Long usuarioId);
 
-    @Query("SELECT SUM(t.valor) FROM transacao t WHERE t.usuario.id = :usuarioId AND t.categoria.tipo = 'gasto'")
+    @Query("SELECT SUM(t.valor) FROM transacao t " +
+            "JOIN t.categoria c " +
+            "WHERE t.usuario.id = :usuarioId AND c.tipo = 'gasto'")
     Float calcular_expense(@Param("usuarioId") Long usuarioId);
+
 }

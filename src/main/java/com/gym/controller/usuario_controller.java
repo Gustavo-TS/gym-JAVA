@@ -4,6 +4,7 @@ import com.gym.model.usuario;
 import com.gym.repository.usuario_repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,18 +28,23 @@ public class usuario_controller {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping
     public ResponseEntity<usuario> criar_usuario(@RequestBody usuario usuario) {
+        String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
+        usuario.setSenha(senhaCriptografada);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario_repository.save(usuario));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<usuario> atualizar_usuario(@PathVariable Long id, @RequestBody usuario dados) {
         return usuario_repository.findById(id)
                 .map(usuario -> {
                     usuario.setEmail(dados.getEmail());
-                    usuario.setSenha(dados.getSenha());
+                    usuario.setNome(dados.getNome());
                     return ResponseEntity.ok(usuario_repository.save(usuario));
                 })
                 .orElse(ResponseEntity.notFound().build());

@@ -52,7 +52,6 @@ public class transacao_controller {
                 .filter(t -> t.getUsuario().getId().equals(usuario.getId()))
                 .map(t -> {
                     t.setValor(dados.getValor());
-                    t.setTipo(dados.getTipo());
                     t.setDescricao(dados.getDescricao());
                     t.setData(dados.getData());
                     t.setCategoria(dados.getCategoria());

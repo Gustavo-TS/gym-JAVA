@@ -13,7 +13,6 @@ public class transacao {
     private Long id;
 
     private float valor;
-    private String tipo;       // "entrada" ou "saida"
     private String descricao;
     private LocalDate data;
 
@@ -28,7 +27,6 @@ public class transacao {
     // Getters
     public Long getId() { return id; }
     public float getValor() { return valor; }
-    public String getTipo() { return tipo; }
     public String getDescricao() { return descricao; }
     public LocalDate getData() { return data; }
     public categoria getCategoria() { return categoria; }
@@ -37,7 +35,6 @@ public class transacao {
     // Setters
     public void setId(Long id) { this.id = id; }
     public void setValor(float valor) { this.valor = valor; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public void setData(LocalDate data) { this.data = data; }
     public void setCategoria(categoria categoria) { this.categoria = categoria; }
