@@ -1,255 +1,156 @@
 # GYM
 
-Sistema de monitoramento financeiro desenvolvido com **Java e Spring Boot**, criado para acompanhar ganhos, gastos e movimentações financeiras de usuários de forma simples e segura.
-
-O projeto possui autenticação com **JWT**, gerenciamento de usuários e visualização de dados financeiros por meio de gráficos.
-
-## Funcionalidades
-
-* Cadastro de usuários
-* Login e autenticação
-* Autorização utilizando JWT
-* Controle de acesso às rotas
-* Registro de ganhos
-* Registro de gastos
-* Consulta de movimentações financeiras
-* Cálculo de saldo
-* Dashboard financeiro
-* Visualização de ganhos e gastos em gráfico
-* Dados financeiros separados por usuário
+API REST para controle financeiro pessoal, desenvolvida com Java e Spring Boot. A aplicação permite cadastrar usuários, organizar categorias e registrar transações de receitas e despesas. As rotas protegidas usam autenticação stateless com JWT.
 
 ## Tecnologias
 
-### Back-end
+- Java 17
+- Spring Boot 3.5.7
+- Spring Web
+- Spring Security
+- Spring Data JPA / Hibernate
+- JWT (JJWT)
+- MySQL
+- Gradle
+- H2 para execução de testes
 
-* Java
-* Spring Boot
-* Spring Web
-* Spring Security
-* JWT
-* JPA / Hibernate
-* Maven
+## Funcionalidades
 
-### Banco de dados
+- Cadastro e login de usuários
+- Senhas armazenadas com BCrypt
+- Autenticação e autorização com JWT
+- Cadastro e consulta de categorias
+- Criação, atualização, consulta e exclusão de transações
+- Separação das transações por usuário autenticado
+- Resumo de receitas, despesas e saldo
 
-* PostgreSQL
-
-### Front-end
-
-* React.js
-* JavaScript
-* HTML
-* CSS
-
-## Arquitetura
-
-O projeto segue uma organização em camadas para separar as responsabilidades da aplicação:
+## Estrutura do projeto
 
 ```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-Database
+src/main/java/com/gym
+├── controller   # Endpoints HTTP
+├── dto          # Objetos de entrada e resposta
+├── model        # Entidades JPA
+├── repository   # Acesso ao banco de dados
+└── security     # Configuração do Spring Security e JWT
 ```
 
-Principais responsabilidades:
+## Configuração
 
-* **Controller:** recebe e responde às requisições HTTP
-* **Service:** concentra as regras de negócio
-* **Repository:** realiza o acesso ao banco de dados
-* **Entity:** representa as entidades persistidas
-* **DTO:** realiza a transferência de dados entre as camadas
-* **Security:** autenticação, autorização e gerenciamento JWT
+### Pré-requisitos
+
+- JDK 17 ou superior
+- MySQL 8 ou superior
+- Git
+
+Crie um banco chamado `gym` no MySQL e ajuste as credenciais em `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/gym
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
+```
+
+O Hibernate está configurado com `ddl-auto=update`, portanto as tabelas são criadas ou atualizadas automaticamente ao iniciar a aplicação. Em ambientes compartilhados ou de produção, substitua as credenciais de exemplo e prefira variáveis de ambiente ou um gerenciador de segredos.
+
+## Executando
+
+No Windows:
+
+```powershell
+.\gradlew.bat bootRun
+```
+
+No Linux ou macOS:
+
+```bash
+./gradlew bootRun
+```
+
+A API ficará disponível em `http://localhost:8080`.
+
+Para executar os testes:
+
+```bash
+./gradlew test
+```
+
+No Windows, use `.\gradlew.bat test` no PowerShell.
 
 ## Autenticação
 
-A autenticação da aplicação é realizada utilizando **Spring Security e JWT**.
-
-Fluxo básico:
-
-```text
-Usuário realiza login
-        ↓
-Servidor valida as credenciais
-        ↓
-JWT é gerado
-        ↓
-Cliente recebe o token
-        ↓
-Token é enviado nas próximas requisições
-        ↓
-Spring Security valida o acesso
-```
-
-As rotas protegidas exigem o envio do token:
+As rotas `/auth/**` são públicas. Todas as outras rotas exigem um token JWT no cabeçalho:
 
 ```http
 Authorization: Bearer <token>
 ```
 
-## Dashboard
+### Cadastrar usuário
 
-O dashboard apresenta um resumo da situação financeira do usuário, incluindo:
-
-* Total de ganhos
-* Total de gastos
-* Saldo disponível
-* Histórico de movimentações
-* Comparação entre receitas e despesas
-* Gráfico financeiro
-
-Exemplo:
-
-```text
-Ganhos: R$ 5.000,00
-Gastos: R$ 3.200,00
-Saldo:  R$ 1.800,00
+```bash
+curl -X POST http://localhost:8080/auth/register \
+        -H "Content-Type: application/json" \
+        -d '{"nome":"Maria","email":"maria@example.com","senha":"senha123"}'
 ```
 
-## Estrutura de dados
+### Fazer login
 
-### Usuário
-
-```text
-id
-nome
-email
-senha
+```bash
+curl -X POST http://localhost:8080/auth/login \
+        -H "Content-Type: application/json" \
+        -d '{"email":"maria@example.com","senha":"senha123"}'
 ```
 
-### Movimentação
+O login retorna um objeto com o token. Use o valor de `token` nas requisições protegidas.
 
-```text
-id
-descricao
-valor
-tipo
-data
-usuario
-```
-
-O tipo da movimentação pode ser:
-
-```text
-RECEITA
-DESPESA
-```
-
-## Principais endpoints
-
-### Autenticação
-
-```http
-POST /auth/register
-POST /auth/login
-```
+## Endpoints
 
 ### Usuários
 
-```http
-GET /users/{id}
-PUT /users/{id}
-DELETE /users/{id}
-```
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/usuarios` | Lista os usuários |
+| `GET` | `/usuarios/{id}` | Busca um usuário por ID |
+| `POST` | `/usuarios` | Cria um usuário |
+| `PUT` | `/usuarios/{id}` | Atualiza nome e e-mail |
+| `DELETE` | `/usuarios/{id}` | Remove um usuário |
 
-### Movimentações
+### Categorias
 
-```http
-GET    /transactions
-POST   /transactions
-GET    /transactions/{id}
-PUT    /transactions/{id}
-DELETE /transactions/{id}
-```
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/categorias` | Lista as categorias |
+| `POST` | `/categorias` | Cria uma categoria |
 
-### Dashboard
+Uma categoria possui `descricao` e `tipo`, sendo o tipo normalmente `ganho` ou `gasto`.
 
-```http
-GET /dashboard
-```
+### Transações
 
-## Executando o projeto
+Todas as rotas abaixo exigem autenticação. O usuário da transação é definido pelo token, e não pelo corpo da requisição.
 
-### Pré-requisitos
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/transacoes` | Lista as transações do usuário autenticado |
+| `POST` | `/transacoes` | Cria uma transação |
+| `PUT` | `/transacoes/{id}` | Atualiza uma transação do usuário |
+| `DELETE` | `/transacoes/{id}` | Remove uma transação do usuário |
+| `GET` | `/transacoes/resumo` | Retorna receitas, despesas e saldo |
 
-Tenha instalado:
-
-* Java 17+
-* Maven
-* PostgreSQL
-* Git
-
-Clone o projeto:
+Exemplo de criação de transação:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+curl -X POST http://localhost:8080/transacoes \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer <token>" \
+        -d '{"valor":150.50,"descricao":"Mensalidade","data":"2026-09-03","categoria":{"id":1}}'
 ```
 
-Entre na pasta:
+O resumo retorna os campos `nome`, `income`, `expense` e `balance`.
 
-```bash
-cd GYM
-```
+## Observações
 
-Configure o banco de dados no arquivo:
+- Não existe frontend neste repositório; o projeto contém somente a API backend.
+- O JWT tem validade de 24 horas.
+- A aplicação permite CORS para qualquer origem na configuração atual. Restrinja `allowedOrigins` antes de publicar em produção.
+- O projeto ainda não possui documentação OpenAPI/Swagger.
 
-```text
-src/main/resources/application.properties
-```
-
-Exemplo:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/gym
-spring.datasource.username=postgres
-spring.datasource.password=sua_senha
-```
-
-Execute:
-
-```bash
-mvn spring-boot:run
-```
-
-A API ficará disponível em:
-
-```text
-http://localhost:8080
-```
-
-## Segurança
-
-O projeto utiliza:
-
-* Spring Security
-* Autenticação JWT
-* Senhas criptografadas
-* Proteção de endpoints
-* Separação de dados por usuário
-* Validação de requisições
-
-## Objetivo do projeto
-
-O GYM foi desenvolvido com o objetivo de aplicar conceitos utilizados no desenvolvimento de aplicações back-end modernas com Java, incluindo:
-
-* Orientação a Objetos
-* APIs RESTful
-* Spring Boot
-* Spring Security
-* JWT
-* JPA e Hibernate
-* Banco de dados relacional
-* Arquitetura em camadas
-* Autenticação e autorização
-* Integração entre front-end e back-end
-
-## Autor
-
-**Gustavo Tagliatti Sampaio**
-
-GitHub: github.com/Gustavo-ts
-Portfólio: gustavots-portfolio.vercel.app
-LinkedIn: linkedin.com/in/gustavo-tagliatti-sampaio-8989aa323
